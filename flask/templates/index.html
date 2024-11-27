@@ -1,1 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Reel Downloader</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="h-full flex items-center justify-center">
+    <div class="max-w-md w-full space-y-8 p-8 bg-white shadow-xl rounded-xl">
+        <h1 class="text-3xl font-bold text-center text-gray-900">Instagram Reel Downloader</h1>
+        <form hx-post="/fetch_reel" hx-target="#response" hx-indicator=".loader" class="mt-8 space-y-6">
+            <div>
+                <label for="reel_url" class="sr-only">Instagram Reel URL</label>
+                <input id="reel_url" name="reel_url" type="url" required class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Enter Instagram Reel URL" oninput="toggleFetchButton()">
+            </div>
+            <div>
+                <button id="fetch_button" type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" disabled>
+                    Fetch Reel
+                </button>
+            </div>
+        </form>
+        <div class="loader hidden">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+        </div>
+        <div id="response" class="mt-8"></div>
+    </div>
+
+    <script>
+        // Function to toggle the 'Fetch Reel' button's enabled state based on URL input
+        function toggleFetchButton() {
+            var urlInput = document.getElementById("reel_url");
+            var fetchButton = document.getElementById("fetch_button");
+            
+            // Enable the button if the input value is a non-empty URL
+            fetchButton.disabled = !urlInput.value.trim().match(/^https:\/\/www\.instagram\.com\/(p|reel)\/[a-zA-Z0-9_-]+/);
+        }
+
+        // Optional: Show the response after the request is successful
+        htmx.on("htmx:afterRequest", function(evt) {
+            if (evt.detail.successful) {
+                var response = evt.detail.xhr.response;
+                var responseDiv = document.getElementById("response");
+                
+                // Check if the response includes the "Download Reel" button
+                if (response.includes("Download Reel")) {
+                    responseDiv.innerHTML = response;
+                    var downloadButton = responseDiv.querySelector("form button");
+                    if (downloadButton) {
+                        downloadButton.className = "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500";
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
 
